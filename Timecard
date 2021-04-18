@@ -1,0 +1,143 @@
+function auto_reply() {
+  //自動返信メールの件名
+  var title = "【出勤簿の入力ありがとうございます（自動返信）】"; 
+
+  //自動返信メールの本文1(\nは改行)
+  var body
+  = "いつもこだまシステムの業務にご助力いただきまして、ありがとうございます。\n"
+  + "ご入力いただいた勤務実績は次の通りです。\n"
+  + "------------------------------------------------------------\n\n"
+
+  //自動返信メールの本文2(\nは改行)
+  var body2
+  = "------------------------------------------------------------\n\n"
+  + "本日もお疲れ様でした！\n";
+ 
+
+  //本文作成用の変数
+  var sheet = SpreadsheetApp.getActiveSheet();
+  const col_A = sheet.getRange('A:A').getValues();
+  const row = col_A.filter(String).length;
+  //var row = sheet.getLastRow();
+  var column = sheet.getLastColumn();
+  var range = sheet.getDataRange();
+
+  console.log("row="+row);
+  console.log("column="+column);
+  //メールアドレス保存用の変数(最後のメール送信時に使用。)
+  var  mail = "";
+  var  chatworkid = "";
+  
+
+  for (var i = 1; i <= column; i++ ) {
+    //スプレッドシートの入力項目名を取得
+    var header = range.getCell(1, i).getValue(); 
+    //スプレッドシートの入力値を取得
+    var value = range.getCell(row, i).getValue();
+        console.log("value="+value);
+      
+        if(header === '年月') continue;
+
+        //本文1(body)にスプレッドシートの入力項目を追加
+    body += "■"+header+"\n";
+ 
+    //本文1(body)にフォームの入力内容を追加
+    body += value + "\n\n";
+ 
+    //スプレッドシートの入力項目が「お名前」の場合は、「様」を付け本文の前に追加
+    if ( header === '氏名（漢字で苗字と名前の間に空白を入れずに記載）' ) {
+          var name = value;
+          console.log("name="+name);
+          body = value +" 様\n\n"+body;
+          
+          
+      }
+        if ( header === '出勤時間（10時の場合は10、10時半の場合は10.5）' ) {
+        var starttime = value;
+        console.log("starttime="+starttime);
+      }
+        if ( header === '退勤時間（10時の場合は10、10時半の場合は10.5）' ) {
+        var endtime = value;
+        console.log("endtime="+endtime);
+      }
+        if ( header === '休憩時間（1時間の場合は1、30分の場合は0.5）' ) {
+        var resttime = value;
+        console.log("resttime="+resttime);
+      }
+        if ( header === '合計勤務時間' ) {
+        var totaltime = value;
+      }
+        if ( header === '業務内容報告' ) {
+        var report = value;
+        console.log("report="+report);
+      }
+        if ( header === '今日の一言！（自由に一言お願いします！）' ) {
+        var onething = value;
+        console.log("onething="+onething);
+      }
+ 
+  }
+  
+    // 登録メールアドレスを取得
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = spreadsheet.getSheetByName('ワーカーリスト');
+    row = sheet.getLastRow();
+    //var data = sheet.getRange(1, 1, row, 2).getValues();
+    var data = sheet.getRange(1, 1, row, 20).getValues();
+    for(var i = 0; i < data.length ; i++ ) {
+      console.log("data["+i+"][0]="+data[i][0]);
+      console.log("data["+i+"][1]="+data[i][1]);
+      if(name == data[i][0]) {
+        mail = data[i][1];
+        chatworkid = data[i][19];
+        break;
+      }
+    }
+
+    //本文1に本文2を追加
+  body += body2;
+    //body = "<debug> mail=" + mail + "</debug>\n" + body;
+  //宛名＝mail、件名＝title、本文=bodyで、メールを送る
+    console.log("@mail="+mail);
+    console.log("@title="+title);
+    console.log("@body="+body);
+
+  //GmailApp.sendEmail(mail,title,body);
+    //GmailApp.sendEmail('kaneshige@kodama-system.com',title,body);
+  
+    // チャットワークに通知
+    //チャットワークAPIトークン：c7bff9108e8d8248cd074a1cd85e44ad
+  var totaltime = endtime - starttime - resttime;
+  var message = "[To:" + chatworkid + "] " + name + "さんから出勤簿の入力を受付ました。\n";
+      message += starttime+"時～"+endtime+"時（うち、休憩"+resttime+"時間）　合計："+ totaltime +"時間\n【業務内容】\n" + report ;
+  console.log("@message="+message);
+    var client = ChatWorkClient.factory({token: 'c7bff9108e8d8248cd074a1cd85e44ad'});
+    client.sendMessage({room_id: 163267194, body: message});
+  
+  // HangoutChatに通知
+  var key = "AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=qeFZTS-zltiiGjTOZEDWShA30vUXWbd64G8pVSeVaQA%3D";
+  var message = name + "さんの今日の一言\n"+onething;
+  HangoutChat(key,message);
+}
+
+function HangoutChat(key,message){
+  //-- HangoutChatに通知 --
+  //POSTの設定
+  var posturl = 'https://chat.googleapis.com/v1/spaces/AAAAkrk_8Ks/messages?key='+key;
+  var payload = {
+    "text": message
+  }
+  
+  var options = {
+    "method" : "POST",
+    "payload" : JSON.stringify(payload),
+    "headers" : {
+      "Content-Type" : "application/json; charset=UTF-8"
+    },
+    "muteHttpExceptions": true
+  };
+  
+  //chatroomにPOST
+  var result = UrlFetchApp.fetch(posturl, options); 
+  
+}
