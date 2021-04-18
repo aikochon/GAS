@@ -1,0 +1,21 @@
+function Bingo() {
+  var spredsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spredsheet.getActiveSheet();
+  var newArray = new Array();
+  var baseArray = sheet.getRange(2,1,1,sheet.getMaxColumns()).getValues();   //前回出力した数値取得
+  
+  var randnum = Math.floor( Math.random() * 100 );  //判定要素つくるため先に一回ひいとく
+
+  for(var i = 0; i < baseArray[0].length; i++){  //どうしても2次元でしか取得しなかったので1次元配列に変換
+    if( baseArray[0][i].length !== 0 ){
+      newArray.push(baseArray[0][i]);
+    }
+  }
+  
+  while ( newArray.indexOf(randnum) != -1 || randnum == 0 ) {
+    randnum = Math.floor( Math.random() * 100 );
+  }
+  
+  sheet.getRange(2,newArray.length + 1).setValue(randnum);
+  
+}
