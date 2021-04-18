@@ -1,0 +1,54 @@
+function BingoSheet(){
+  var spredsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spredsheet.getActiveSheet();
+  
+  var randArray = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+  var column = 2;
+  
+  for(var y = 0; y <= 9; y++){         //ビンゴシートクリア
+    var row = 5;
+    for(var i = 0; i <= 4; i++){
+      sheet.getRange(row, column, 5, 5).clearContent();
+      row += 7;
+    }
+    column += 6;
+  }
+  
+  for(var arrayNum = 0; arrayNum <= 49; arrayNum++){
+    for(var a = 0; a <= 24; a++){        //ビンゴの中身生成
+      while(true){
+        var randnum = Math.floor( Math.random() * 100 );
+        if(randArray[arrayNum].indexOf(randnum) == -1 && randnum != 0){
+          randArray[arrayNum][a] = randnum;
+//          console.log("randArray["+arrayNum+"]["+a+"]" + randArray[arrayNum][a]);
+          break;
+        }
+      }
+    }
+  }
+  
+  var columnSet = 0;
+  var sheetnum = 0;
+  for(var y = 0; y <= 9; y++){         //ビンゴシートセット
+    var rowSet = 0;
+    for(var i = 0; i <= 4; i++){
+      var d = 0;
+      for(var b = 5; b <= 9; b++){
+        for(var c = 2; c <= 6; c++){
+          if(d!=12){
+            sheet.getRange(b+rowSet, c+columnSet, 1, 1).setValue(randArray[sheetnum][d]);
+            console.log("randArray["+sheetnum+"]["+d+"]" + randArray[sheetnum][d]);
+            d++;
+          }else{
+            sheet.getRange(b+rowSet, c+columnSet, 1, 1).setValue("");
+            d++;
+          }
+        }
+      }
+      sheetnum++;
+      rowSet += 7;
+    }
+    columnSet += 6;
+  }
+  
+}
