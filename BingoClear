@@ -1,0 +1,6 @@
+function Clear() {
+  var spredsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spredsheet.getActiveSheet();
+  
+  sheet.getRange(2,1,1,sheet.getMaxColumns()).clearContent();  
+}
