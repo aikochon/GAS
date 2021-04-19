@@ -1,0 +1,60 @@
+function SendMail() {
+  var spreadsheet = SpreadsheetApp.openById('1vipx1bPMEiLJjNKUqpWVvmtH0Vrz_hm4B4SxPN6ua1A');
+  var UICh = spreadsheet.getSheetByName("自動依頼UI");
+  //送信クリック後の処理MSGBox
+  var question = Browser.msgBox("依頼を送信しますか？", Browser.Buttons.OK_CANCEL);
+  if (question == "ok"){
+    //3日後の日付（返信期限）
+    var date = new Date();
+    date.setDate(date.getDate() + 3);//3日後
+    var YYYY = Utilities.formatDate(date, 'JST', 'yyyy');
+    var MM = Utilities.formatDate(date, 'JST', 'MM');
+    var DD = Utilities.formatDate(date, 'JST', 'dd');
+    
+    var category = UICh.getRange("C5").getValue();                                           //【メール】"カテゴリー" 取得用
+    
+    var LastRow = UICh.getLastRow();                                                         //シート最終行番号取得
+    var mailArys = [[],[]];                                                                  //全データ取得用二次元配列定義
+    
+    mailArys = UICh.getRange(1,1,LastRow,UICh.getMaxColumns()).getValues();                  //シート全体取得(2次配列で取得[mailArys[0][1]])
+    LastRow = LastRow - 1;                                                                   //配列が0から始まるため
+    
+    var sheetName = "【メール】" + category;                                                   //【メール】"カテゴリー" 取得
+    var mailSheet = spreadsheet.getSheetByName(sheetName);
+    var title = mailSheet.getRange("A2").getValue();                                         //メールタイトル取得
+    //メール本文
+    var mainText = mailSheet.getRange("A3").getValue();   
+        mainText = mainText + mailSheet.getRange("A4").getValue();
+        mainText = mainText + mailSheet.getRange("A5").getValue();
+        mainText = mainText +  MM+"月";
+        mainText = mainText +  DD+"日";
+        mainText = mainText + mailSheet.getRange("A6").getValue();
+        mainText = mainText + mailSheet.getRange("A7").getValue();
+        mainText = mainText + mailSheet.getRange("A8").getValue();
+        mainText = mainText + mailSheet.getRange("A9").getValue();
+
+    var count = 0;
+  
+    for ( var i = 7; i <= LastRow; i++ ){                                                    //8行目から回す
+      if ( mailArys[i][0] === true ){                                                        //チェックボックスにチェックが入っていれば
+        if ( mailArys[i][20].length > 0 ){                                                   //メールアドレスの項目が空白でなければ
+          UICh.getRange(i+1,29,UICh.getMaxRows(),1).clearContent();                          //一度メールアドレス無しの表示を初期化して
+          var strSei=UICh.getRange(i+1,11).getValue();　//名前
+          var strBody=mainText.replace(/{姓}/g,strSei);
+          GmailApp.sendEmail(mailArys[i][20], title, strBody);
+        }else{                                                                               //メールアドレスの項目が空白
+          UICh.getRange(i+1,29,UICh.getMaxRows(),1).clearContent();                          //一度メールアドレス無しの表示を初期化して
+          UICh.getRange(i+1,29,1,1).setValue("メールアドレス無し");                             //メールアドレス無しと表示
+          count++;
+        }
+      }
+    }
+    UICh.getRange(5,6,1,1).clearContent();
+    if( count !={} ){
+      UICh.getRange(5,6,1,1).setValue("メールアドレス無し　"+count+"人");
+    }
+  }
+  else{
+    Browser.msgBox("キャンセルしました。");
+    }
+}
