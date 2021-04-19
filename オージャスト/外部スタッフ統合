@@ -1,0 +1,163 @@
+/**
+ *  新旧スタッフ応募フォーム情報の結合
+ *  新シートに統合
+ * trigger 6時間ごと
+ */
+function implodeStaff(e)
+{
+  return;
+  // 関数の実行停止中
+  //
+  // 処理の実際は下記スクリプトを参照のこと
+  // https://script.google.com/a/orgiast.jp/d/MXGhkMvPwxWuVnQqP2bOhKtDltQaPJrA9/edit
+  //
+  
+  
+  // 新登録フォームデータ
+  var url = "https://docs.google.com/spreadsheets/d/1t8EDuMJc7Xi4rimkc9cGI6qSU0S9Rt4oLVVsobx5cXg/edit";
+  var ss = SpreadsheetApp.openByUrl(url);
+  var sheet = ss.getSheetByName("フォームの回答 1");
+  var values = sheet.getRange("A2:Z").getValues().filter(function(e){return e[0];});
+  
+  /*
+  // 旧登録フォームデータ
+  ss = SpreadsheetApp.getActiveSpreadsheet();
+  sheet = ss.getSheetByName("外注リストUNIQUE");
+  var values2 = sheet.getRange("A4:AJ").getValues().filter(function(e){return e[1];})
+                     .map(function(e){
+                       return [
+                         e[0],
+                         e[17],
+                         e[9],
+                         e[10],
+                         e[16],
+                         e[12],
+                         e[11],
+                         [e[1],e[2],e[3],e[4],e[5]].join(",").replace(/,+$/, ""),
+                         e[6],
+                         e[24],
+                         e[25],
+                         e[26],
+                         e[27],
+                         e[28],
+                         e[29],
+                         e[30],
+                         e[31],
+                         e[32],
+                         e[33],
+                         e[34],
+                         e[35],
+                         "",
+                         "",
+                         "",
+                         "",
+                         ""                         
+                       ];});
+  
+  for(var i=0; i<values2.length; i++) {
+    values.push(values2[i]);
+  }
+      
+  sheet = ss.getSheetByName("新外注先リスト登録用フォームのテスト");
+  var range = sheet.getRange("新外注先リスト登録用フォームのテスト!A13:Z");
+  range.clearContent();
+  SpreadsheetApp.flush();
+  if(values.length>0) {
+    sheet.getRange(13, 1, values.length, values[0].length).setValues(values);
+    SpreadsheetApp.flush();
+  }
+  */
+  
+}
+
+
+
+/**
+ *  新旧スタッフ応募フォーム情報の結合
+ *  旧シートに統合
+ *  trigger 6時間ごと
+ */
+function implodeStaffOlderList(e)
+{
+  return;
+  // 関数の実行停止中
+  //
+  // 処理の実際は下記スクリプトを参照のこと
+  // https://script.google.com/a/orgiast.jp/d/MXGhkMvPwxWuVnQqP2bOhKtDltQaPJrA9/edit
+  //
+  
+  
+  // 統合済みフォームデータ
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("新外注先リスト登録用フォームのテスト");
+  var values = sheet.getRange("A13:Z").getValues().filter(function(e){return e[0];});
+  
+  // 旧登録フォームデータ
+  ss = SpreadsheetApp.getActiveSpreadsheet();
+  sheet = ss.getSheetByName("外注先リスト");
+  var values2 = [];
+  var names = sheet.getRange("J4:J").getValues().filter(function(e){return e[0];}).map(function(e){return e[0]});
+  var mails = sheet.getRange("R4:R").getValues().filter(function(e){return e[0];}).map(function(e){return e[0]});
+  
+  for(var i=0; i<values.length; i++) {
+    // J:名前 R:メール
+    if(names.indexOf(values[i][2])<0 && mails.indexOf(values[i][1])<0) {
+    //if(names.indexOf(values[i][2])<0 || mails.indexOf(values[i][1])<0) {
+      var cat = values[i][7].split(",");
+      for(; cat.length<5; ) {
+        cat.push("");
+      }
+      var tmp = [
+        values[i][0],
+        cat[0], cat[1], cat[2], cat[3], cat[4],
+        values[i][8],
+        "", // ランク
+        "", // 理由
+        values[i][2], // 名前
+        values[i][3], // 年齢
+        values[i][6], // 地域
+        values[i][5], // 住所
+        "", // クオリティ
+        "", // 制作単価
+        "", // 単価
+        values[i][4], // 電話
+        values[i][1], // メール
+        "", // ｵｰｼﾞｬｽﾄﾒｰﾙ
+        "", // ＵＲＬ
+        "", // ｵｰｼﾞｬｽﾄ名刺
+        "", // どこから応募したか
+        "", //"打診案件（日付/金額/返答有無〇✖）"
+        "", // "担当した案件評価"
+        "", // 備考・実績
+        values[i][9], // イベント実績アップロード(ディレクター・プランナー)
+        values[i][10], // デザインアップロード(パンフレット系)
+        values[i][11], // デザインアップロード(WEBデザイン系)
+        values[i][12], // デザインアップロード(チラシ系)
+        values[i][13], // デザインアップロード(ノベルティ系)
+        values[i][14], // デザインアップロード(ロゴ系)
+        values[i][15], // 映像アップロード(CM/プロモーション系)
+        values[i][16], // 映像アップロード(採用系)
+        values[i][17], // 映像アップロード(インタビュー系)
+        values[i][18], // 映像アップロード(イベント系)
+        values[i][19], // 写真アップロード(写真撮影実績)
+        values[i][20] // ライターアップロード(ライティング実績)
+      ];
+      values2.push(tmp);
+    }
+  }
+
+  if(values2.length>0) {
+    sheet = ss.getSheetByName("外注先リスト");
+    var less = sheet.getRange("A4:Z").getValues().map(function(e){return e.join("");}).filter(function(e){return e[0]});
+    var row = less.length+4;
+    sheet.getRange(row, 1, values2.length, values2[0].length).setValues(values2);
+    SpreadsheetApp.flush();
+    
+    sheet = ss.getSheetByName("外注リストUNIQUE");
+    values = sheet.getRange("A1:AQ").getValues();
+    sheet = ss.getSheetByName("外注先リスト");
+    values = sheet.getRange("A4:AQ").clearContent().setValues(values);
+    
+  }
+  
+}
