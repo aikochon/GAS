@@ -1,0 +1,60 @@
+function LookUp (){//抽出ボタン
+  var spreadsheet = SpreadsheetApp.openById('1vipx1bPMEiLJjNKUqpWVvmtH0Vrz_hm4B4SxPN6ua1A');
+  var sheet = spreadsheet.getSheetByName("外注先リスト");//本番用
+  //var sheet = spreadsheet.getSheetByName("【テスト用】外注先リスト");//テスト用
+  var arys = [[],[]];                  //全データ取得用二次元配列定義
+  var inputData = new Array();         //出力用配列(一次元)
+  var count = 0;                       //該当セル数カウント用
+  var LastRow = sheet.getLastRow();    //シート最終行番号取得
+  arys = sheet.getRange(1,1,sheet.getMaxRows(),sheet.getMaxColumns()).getValues();   //シート全体取得
+  var LastRow = sheet.getLastRow();     //シート最終行番号取得
+  LastRow = LastRow - 1;   //配列が0から始まるため。
+  
+  var UICh = spreadsheet.getSheetByName("自動依頼UI");
+  var area = UICh.getRange("C4").getValue();
+  var category = UICh.getRange("C5").getValue();
+  
+  for( var i = 0; i <= LastRow; i++ ){
+    if( arys[i][7] != "発注禁止" ){
+      if( area == "全国" ){
+        if( arys[i][1] == category || arys[i][2] == category || 
+           arys[i][3] == category || arys[i][4] == category || arys[i][5] == category ){
+          inputData[count] = new Array();
+          for( var j = 0; j <= 25; j++ ){
+            inputData[count].push(arys[i][j]);
+          }
+          count++;
+          console.log("count"+count);
+        }
+      }else if( arys[i][11] == area ){
+        if( arys[i][1] == category || arys[i][2] == category || 
+           arys[i][3] == category || arys[i][4] == category || arys[i][5] == category ){
+          inputData[count] = new Array();
+          for( var j = 0; j <= 25; j++ ){
+            console.log("arys["+i+"]["+j+"]"+arys[i][j]);
+            console.log("i"+i+"j"+j);
+            inputData[count].push(arys[i][j]);
+          }
+          count++;
+          console.log("count"+count);
+        }
+      }
+    }
+  }
+  if( count == 0 ){
+    UICh.getRange(5,6,1,1).clearContent();
+    UICh.getRange(8,1,UICh.getMaxRows(),UICh.getMaxColumns()).clearContent();
+    UICh.getRange(8,1,UICh.getMaxRows(),UICh.getMaxColumns()).removeCheckboxes();
+    UICh.getRange(5,6,1,1).setValue("該当者なし");
+  }else{
+    UICh.getRange(5,6,1,1).clearContent();
+    UICh.getRange(8,1,UICh.getMaxRows(),UICh.getMaxColumns()).clearContent();
+    UICh.getRange(8,1,UICh.getMaxRows(),UICh.getMaxColumns()).removeCheckboxes();
+    UICh.getRange(8,2,count,j).setValues(inputData);
+    UICh.getRange(8,1,count,1).insertCheckboxes();
+  }
+  //B列の最終行を取得_
+    var r = UICh.getRange("B8:B").getValues();　 //B列の値を全て取得
+    r = r.filter(String).length;　　//空白の要素を除いた長さを取得
+    UICh.getRange(8,1,r,1).setValue("TRUE");//A列にチェックボックスTRUE
+}
