@@ -1,0 +1,50 @@
+function createEventForm_UI(){
+//初期設定
+  const ss = SpreadsheetApp.getActiveSpreadsheet()
+  const UI_SS = ss.getSheetByName('自動依頼UI').getDataRange().getValues();
+  const sheet = ss.getSheetByName('自動依頼UI');
+
+//コード、案件名チェック
+  var CodeCell = sheet.getRange("B1");; //案件名
+  if(CodeCell.isBlank()){
+    Browser.msgBox("案件名を入力してください。");
+
+    const flag = true;
+    try {
+     if (flag) {
+      throw new Error('終了します');
+    }
+      console.log('実行されないコード');
+     } catch (e) {
+  }
+  }
+  Browser.msgBox("新しく返信用フォームを生成します。 \\n PG終了後は回答シートのシート名を適切に変更してください。");
+//タイトル
+  const formTitle = UI_SS[0][1]; //タイトル
+  const formDescription = UI_SS[1][1]; //概要
+  const formCategory = UI_SS[4][2]; //カテゴリー
+  
+  const form = FormApp.create(formTitle);
+  form.setDescription(formDescription);
+   // 公開用URLを取得
+  var form_URL = form.getPublishedUrl();
+  sheet.getRange("I4").setValue(form_URL);
+  
+  //アンケート部
+  form.setDescription(formDescription);
+  
+   form.addMultipleChoiceItem()
+    .setTitle(formTitle + "　" + formCategory + " " + "ご相談内容についての回答")
+    .setChoiceValues(['（受けれる）スケジュール仮押さえ', '（受けれない）お断りいたします', '保留させて頂きます。'])
+    .setRequired(true);
+  form.addParagraphTextItem().setTitle('お引き受け頂けるときの条件等があればお書きください。');
+  form.addParagraphTextItem().setTitle('保留された場合はご理由をお聞かせください。');
+  
+  form.addTextItem().setTitle('氏名もしくは会社名（ご面倒ですがテンプレートフォームの為ご記述お願い致します。）').setRequired(true); 
+  form.addTextItem().setTitle('連絡先メールアドレス（ご面倒ですがテンプレートフォームの為ご記述お願い致します。）').setRequired(true);
+  form.addTextItem().setTitle('連絡先電話番号（任意）').setRequired(true);
+  
+  
+  // フォームにリンク付する
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+}
