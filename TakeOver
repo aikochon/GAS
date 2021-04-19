@@ -1,0 +1,15 @@
+function takeOver() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName('対応履歴');
+  
+  var arys = [[],[]];      //二次配列定義
+  var LastRow = sheet.getRange("A:A").getLastRow();          //シート最終行取得
+  arys = sheet.getRange(1,LastRow,sheet.getMaxRows(),sheet.getMaxColumns()).getValues();   //シート全体取得(2次配列で取得[arys[0][1]])
+  var range = sheet.getDataRange();
+  var value = range.getCell(LastRow, i).getValue();
+  
+  //var hashColor2[sheet.getRange(i, 1).getValue()] = sheet.getRange(i, 3).getValue();
+  
+  console.log("data="+value);
+  
+}
