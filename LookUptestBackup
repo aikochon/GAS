@@ -1,0 +1,164 @@
+function LookUp (){
+  //日付抽出→日付合わせ、範囲確定
+  //処理日、処理者何方も入力済み抽出
+  //送付済／送信不可区分空欄抽出
+  //→一行ずつデータに起こしてチャット送信
+  
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName('1月用リスト');
+  var arys = [[],[]];    //二次配列定義
+  arys = sheet.getRange(1,1,sheet.getMaxRows(),sheet.getMaxColumns()).getValues();   //シート全体取得(2次配列で取得[arys[0][1]])
+  var LastRow = sheet.getLastRow();          //シート最終行番号取得
+  console.log('no：'+LastRow);
+  
+  var data = [];   //一次配列定義
+  var count = 0;   //該当セル数カウント用
+  console.log('data:'+data[0]);
+  
+  /*
+  
+  //日付判定用比較対象
+  var today = new Date();                       //今日
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() -1);    //昨日
+  var daybefore = new Date();
+  daybefore.setDate(daybefore.getDate() -2);    //一昨日
+  var mthreedays = new Date();
+  mthreedays.setDate(mthreedays.getDate() -3);  //3日前
+  var mfourdays = new Date();
+  mfourdays.setDate(mfourdays.getDate() -4);    //4日前
+  var mfivedays = new Date();
+  mfivedays.setDate(mfivedays.getDate() -5);    //5日前
+  var msixdays = new Date();
+  msixdays.setDate(msixdays.getDate() -6);      //6日前
+  var msevendays = new Date();
+  msevendays.setDate(msevendays.getDate() -7);  //7日前
+  
+  */
+  
+  /*
+    //日付判定用比較対象
+  var today = Moment.moment();                       //現在時刻
+  var yesterday = today.subtract(1, 'days');         //昨日
+  var daybefore = today.subtract(2, 'days');         //一昨日
+  var mthreedays = today.subtract(3, 'days');         //3日前
+  var mfourdays = today.subtract(4, 'days');         //4日前
+  var mfivedays = today.subtract(5, 'days');         //5日前
+  var msixdays = today.subtract(6, 'days');         //6日前
+  var msevendays = today.subtract(7, 'days');         //7日前
+  
+  */
+  /*
+  yesterday.setDate(yesterday.getDate() -25);
+  var daybefore = new Date();
+  daybefore.setDate(daybefore.getDate() -26);
+  var mthreedays = new Date();
+  mthreedays.setDate(mthreedays.getDate() -27);
+  var mfourdays = new Date();
+  mfourdays.setDate(mfourdays.getDate() -28);
+  var mfivedays = new Date();
+  mfivedays.setDate(mfivedays.getDate() -29);
+  var msixdays = new Date();
+  msixdays.setDate(msixdays.getDate() -30);
+  var msevendays = new Date();
+  msevendays.setDate(msevendays.getDate() -31);
+  */
+  
+    //日付判定用比較対象
+  var today = Moment.moment();                       //現在時刻
+  var yesterday = Moment.moment().subtract(27, 'days');         //昨日
+  var daybefore = Moment.moment().subtract(28, 'days');         //一昨日
+  var mthreedays = Moment.moment().subtract(29, 'days');         //3日前
+  var mfourdays = Moment.moment().subtract(30,'days');         //4日前
+  var mfivedays = Moment.moment().subtract(31, 'days');         //5日前
+  var msixdays = Moment.moment().subtract(32, 'days');         //6日前
+  var msevendays = Moment.moment().subtract(33, 'days');         //7日前
+  
+  console.log("today:"+today.format('YYYY,MM,DD'));
+  console.log("yestarday:"+yesterday.format('YYYY,MM,DD'));
+  console.log("daybefore:"+daybefore.format('YYYY,MM,DD'));
+  console.log("3:"+mthreedays.format('YYYY,MM,DD'));
+  console.log("4:"+mfourdays.format('YYYY,MM,DD'));
+  console.log("5:"+mfivedays.format('YYYY,MM,DD'));
+  console.log("6:"+msixdays.format('YYYY,MM,DD'));
+  console.log("7:"+msevendays.format('YYYY,MM,DD'));
+  
+  LastRow = LastRow - 1;   //配列が0から始まるため、最後存在しない行まで参照しようとするため -1
+   //   if(arys[i][5].getFullYear() === mfourdays.getFullYear() && arys[i][5].getMonth() === mfourdays.getMonth() && arys[i][5].getDate() === mfourdays.getDate()){
+  
+  console.log('ary'+arys[2][5]);
+  console.log('出力結果: ' + arys.length);
+  for( var i = 0; i <= LastRow; i++ ){
+    if( Moment.moment(arys[i][5]).isSame(yesterday, 'day') || Moment.moment(arys[i][5]).isSame(daybefore, 'day') || 
+        Moment.moment(arys[i][5]).isSame(mthreedays, 'day') || Moment.moment(arys[i][5]).isSame(mfourdays, 'day') || 
+        Moment.moment(arys[i][5]).isSame(mfivedays, 'day') || Moment.moment(arys[i][5]).isSame(msixdays, 'day') || 
+        Moment.moment(arys[i][5]).isSame(msevendays, 'day') ){
+          if( arys[i][6] != {}){
+            if( arys[i][4].length == 0 && arys[i][7].length == 0 ){  //何でかわからんけど=={}(空白の場合)の判定が効かないので、.length==0(配列のデータ数が0の場合)に変更
+                data[count] = arys[i][0];    //data[i]で回してるのでpushいらない。アホか
+                count++;                     //for文回してif文で判定してるのに全部入ってくるはずないdata[i]に記入させたらそらおかしくなる
+                //data[i] = data.push(sheet.getRange(arys[i][0]));
+            }
+          }
+    }
+  }
+   // if(arys[i][5] == mfourdays){
+  //if( arys[i],6 == today || arys[i],6 == daybefore || arys[i],6 == mthreedays || arys[i],6 == mfourdays || arys[i],6 == mfivedays || arys[i],6 == msixdays || arys[i],6 == msevendays ){
+      //console.log('0.901');
+    /*
+      if( arys[i][7] !== value.match(/\s/)){
+        if( arys[i][5] == value.match(/\s/) && arys[i][8] == value.match(/\s/) ){
+          data[i] = data.push(sheet.getRange(arys[i][0]));
+          count = i++;
+          console.log("countin="+count);
+        }
+      }
+    }*/
+  
+  
+  /*
+  console.log(arys[2][6]);
+  for( var i = 0; i <= LastColumn; i++ ){
+     console.log("0.001");
+    if( arys[i],6 == today || arys[i],6 == daybefore || arys[i],6 == mthreedays || arys[i],6 == mfourdays || arys[i],6 == mfivedays || arys[i],6 == msixdays || arys[i],6 == msevendays ){
+      console.log("1");
+      if( arys[i],7 !== value.match(/\s/)){
+        if( arys[i],5 == value.match(/\s/) && arys[i],8 == value.match(/\s/) ){
+          data[i] = data.push(sheet.getRange(arys[i],0));
+          count = i++;
+          console.log("countin="+count);
+        }
+      }
+    }
+  }
+  console.log("count="+count);
+  */
+  
+  if(count == 0){
+    var message = "先週の 送付済/送信不可区分 未記入はありませんでした。\n";
+  }
+  else if(count != 0){
+    var message = "先週の 送付済/送信不可区分 未記入一覧です。\n\n";
+    message += data + "\n\n";
+    message += "A行,No.の表示となっています。\nスプレッドシート上にて[Ctr+F]またはメニューバー「編集」の検索と置換から上記番号の検索をお願いします。";
+  }
+  var client = ChatWorkClient.factory ({token: 'a68ba27c640b687d6183d1d517d4de1b'});
+  client.sendMessage({room_id: 167629607, body: message}); 
+  
+  
+  
+  // チャットワークに通知
+    //チャットワークAPIトークン(金重さんアカウント)：c7bff9108e8d8248cd074a1cd85e44ad
+    //API Token(こだまbot):785644c64905c0ab4b02c70d730041ba
+    //自分の Token : a68ba27c640b687d6183d1d517d4de1b
+  
+    //フォームマーケティンググループ
+    //ID : 166606269
+    
+    //ITサポート準備室
+    //ID : 152452297
+    
+    //マイチャット
+    // RoomID : 167629607
+    
+}
