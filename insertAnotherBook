@@ -1,0 +1,17 @@
+function insertAnotherBook() {
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  var mySheetLastRow = sheet.getLastRow();            //作業中のシート
+
+  var masterBook = SpreadsheetApp.openById('1uGinwV8fGGTZYNXazUyF0SruEfG3jHiadpUcRNgvN6g');
+  var masterSheet = masterBook.getSheetByName('管理者シート');
+  var masterSheetLastRow = masterSheet.getLastRow();  //管理者シート
+
+  const data = sheet.getRange(3,1,1,sheet.getLastColumn()).getValues();
+  
+  //管理者シートに追加
+  masterSheet.getRange(masterSheetLastRow + 1, 1, 1, sheet.getLastColumn()).setValues(data);
+  //自分のシートに追加
+  sheet.getRange(mySheetLastRow + 1, 1, 1, sheet.getLastColumn()).setValues(data);
+}
