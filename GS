@@ -1,0 +1,16 @@
+function doPost(e) {
+  var topPage = HtmlService.createTemplateFromFile("index");
+  
+  var sheetId = SpreadsheetApp.openById('1ST_v_O6TclAjMBSR3rP1Dw-zvkhc6Uq9ydr5xTn143o');
+  var sheetName = sheetId.getSheetByName('test');
+  var time = new Date();
+  
+  var name = e.parameter.name;
+  var gender = e.parameter.gender;
+  var animal = e.parameter.animal;
+  
+  sheetName.appendRow([time,name,gender,animal]);
+  
+  var resultPage = HtmlService.createTemplateFromFile("result");
+  return resultPage.evaluate();
+}
