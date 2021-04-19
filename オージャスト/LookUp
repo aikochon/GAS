@@ -1,0 +1,61 @@
+//var area = "関東";
+//var category = "映像制作";
+
+function CreatorFilter() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("外注先リスト");
+  var LastCol = sheet.getLastColumn();
+  var LastRow = sheet.getLastRow();
+  var values = sheet.getRange(1, 1, LastRow, LastCol).getValues();
+
+  // 20151125
+  var sheet2 = ss.getActiveSheet();
+  var area = sheet2.getRange("K2").getValue();
+  var category = sheet2.getRange("K3").getValue();
+
+  var category_flag = false;
+  var i;
+  var arr = [];
+  for(i=5;i<values.length;i++){
+    category_flag = false;
+    
+    // 地域が該当しなければ次へ
+    if(area == ""){
+    }else if(values[i][10] != area){
+      continue;
+    }
+    
+    if(values[i][1] == category){
+      category_flag = true;
+    }
+    if(values[i][2] == category){
+      category_flag = true;
+    }
+    if(values[i][3] == category){
+      category_flag = true;
+    }
+    if(values[i][4] == category){
+      category_flag = true;
+    }
+    if(values[i][5] == category){
+      category_flag = true;
+    }
+
+    // カテゴリ1〜5に該当がなければ次へ
+    if(!category_flag){
+      continue;
+    }
+    arr.push(values[i]);
+
+  }
+  Logger.log(arr);
+  
+  if(arr[0] == undefined){
+    Browser.msgBox("条件に一致するものがありません。地域とカテゴリを再選択してください。");
+  }else{
+    sheet2.getRange(10, 1, 1000, arr[0].length).clear();
+    sheet2.getRange(10, 1, arr.length, arr[0].length).setValues(arr);
+  //  return arr;
+  }
+  
+}
