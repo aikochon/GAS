@@ -1,0 +1,160 @@
+function forming(e) {
+  return [[
+      e[0],   // A タイムスタンプ
+      e[7],   // H 業務1
+      e[8],   // I 業務2
+      e[9],   // J 業務3
+      e[10],  // K 業務4
+      e[11],  // L 業務5
+      '=clean("'+e[12]+'")',  // M スキル
+      null,          // ランク
+      null,          // 理由
+      e[2],   // C 名前
+      e[3],   // D 年齢
+      e[5],   // F 地域
+      e[4],   // E 住所
+      e[16],  // Q クオリティ
+      null,          // 制作単価
+      null,          // 単価
+      e[6],   // G 電話
+      e[1],   // B メール
+      null,
+      e[14],  // O web
+      ]];
+}
+
+/*
+ *  外注先リスト ドキュメントID
+ */
+var ssid = '1vipx1bPMEiLJjNKUqpWVvmtH0Vrz_hm4B4SxPN6ua1A';
+
+
+/**
+ *  フォーム投稿時の外注先リスト反映
+ *
+ *  2019.02.10現在 機能していません
+ */
+function onFormSubmit(e) {
+  return;
+  Logger.log(new Date());
+  
+  try {
+    Logger.log(e);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sht = ss.getSheetByName('外注先リスト');
+    
+    var values = forming(e.values);
+    
+    var row = sht.getLastRow();
+    var range = sht.getRange(row+1, 1, 1, values[0].length);
+    range.setValues(values);
+  }
+  catch(x) {
+    GmailApp.sendEmail('nishi@orgiast.jp', '外注先リスト 登録エラー', x.getMessage());
+  }
+}
+
+
+/**
+ *  フォーム投稿トリガー取りこぼし救済
+ *  時間トリガー
+ *  毎日3時に起動
+ */
+function triming(e){
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet1 = ss.getSheetByName('外部パートナー登録フォーム');
+  var values1 = sheet1.getRange('A2:AM').getValues()
+                 .filter(function(e){return e[0];});
+  
+  var sheet2 = ss.getSheetByName('外注先リスト');
+  var values2 = sheet2.getRange('J946:J').getValues()
+                 .map(function(e){return e[0]})
+                 .filter(function(e){return e[0];});  // このあたりからフォーム投稿分が反映されている
+  
+  for(var i=0; i<values1.length; i++)
+  {
+    // 登録の一致確認
+    var name1 = values1[i][2];
+    var idx = values2.indexOf(name1);
+    if(idx == -1)
+    {
+      // 一致要素がなかった場合は 外注先リストに転記する
+      var row = getLastRowIndex(sheet2);
+      //if(sheet2.getMaxRows() - row < 5)// データ最終行がシート最終行に近いなら
+      //{
+      //  sheet2 = sheet2.insertRowsAfter(sheet2.getMaxRows(), 10);
+      //}
+      
+      var values = forming(values1[i]);
+      
+      var range = sheet2.getRange(row, 1, 1, values[0].length);
+      range.setValues(values);
+      
+    }
+  }
+  SpreadsheetApp.flush();
+}
+
+function getLastRowIndex(sheet)
+{
+  var ss = SpreadsheetApp.getActiveSpreadsheet();  
+  var sheet = ss.getSheetByName('外注先リスト');
+  
+  var cols = sheet.getMaxColumns();
+  var rows = sheet.getMaxRows();
+  var values = sheet.getRange(1, 1, rows, cols).getValues().map(function(e){return e.join("");});
+  
+  for(var i=2; i<values.length; i++) {
+    if(!values[i]) {
+      return i+1;
+    }
+  }
+  return rows;
+}
+
+/**
+ *  アシスタント申請者用に登録実績フォルダを作成する
+ *  フォルダは「氏名_timestamp」とし、リンクを知っている全員が編集可能とする
+ *
+ *  did  string ベースとなるドライブフォルダID
+ *  user string 申請者氏名
+ *  mail string 申請者メールアドレス
+ *  date Date   発行日時
+ */
+function createFolder(did, user, mail, date) {
+  var fname = user + Utilities.formatDate(date, 'JST', '_yyyyMMddHHmmss');
+  var drive = DriveApp.getFolderById(did);
+  var folder = drive.createFolder(fname);
+  
+  folder.addEditor(mail);  // 編集者として追加
+  
+  var body = '<p>';
+  body += "======================";
+  body += "制作実績のアップロード";
+  body += '</p>';
+  body += '<p>';
+  body += "フォーム送信後に下記にアクセス頂くと、お名前のフォルダがございます。"+'</br>';
+  body += "そちらに実績のアップロードをお願いいたします。"+'</br>';
+  body += "下記グーグルドライブのURLにアップロードをお願いします。"+'</br>';
+  body += '<a href="URL"></a>';
+  body += '</p>';
+  body += '<p>';
+  body += "実績につきましてはお仕事をご依頼させて頂く際に"+'</br>';
+  body += "参考とさせていただきますので可能な限りアップロードをお願いいたします。"+'</br>';
+  body += "例)クリエーター様→ 制作物の実績"+'</br>';
+  body += "例)イベントディレクター様→台本や運営マニュアル等の実績"+'</br>';
+  body += '</p>';
+  body += '<p>';
+  body += "【アップロード方法】"+'</br>';
+  body += "URLを開いていただき、実績を保存したフォルダをそのままアップロードください。"+'</br>';
+  body += "・圧縮ファイルでアップロードしないでください。"+'</br>';
+  body += "・フォルダ名はお名前にしてください。"+'</br>';
+  body += "・ファイルアップロードサイズに制限は特にございません。"+'</br>';
+  body += '</p>';
+  body += '<p>';
+  body += "実績がない場合はそのまま送信ボタンを押してください。"+'</br>';
+  body += "ただしクリエーターの方は必ず実績をアップロードしてください。"+'</br>';
+  body += "======================";
+  body += '</p>';
+  
+}
