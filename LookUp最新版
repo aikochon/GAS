@@ -1,0 +1,98 @@
+function LookUptesttest (){
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getActiveSheet();
+  var arys = [[],[]];      //二次配列定義
+  arys = sheet.getRange(1,1,sheet.getMaxRows(),sheet.getMaxColumns()).getValues();   //シート全体取得(2次配列で取得[arys[0][1]])
+  var LastRow = sheet.getLastRow();          //シート最終行番号取得
+  LastRow = LastRow - 1;   //配列が0から始まるため。また、デフォルトで作成された行以内のデータであれば問題ないが、データ数が多すぎて最後存在しない行まで参照しようとするため
+  var data = [];           //一次配列定義
+  var count = 0;           //該当セル数カウント用
+  var urlnum = 1;          //URL用
+  
+  console.log("data="+data[0]);
+  
+  //日付判定用比較対象
+  var today = Moment.moment();          　　　　　　            //現在時刻
+  var yesterday = Moment.moment().subtract(1, 'days');        //昨日
+  var daybefore = Moment.moment().subtract(2, 'days');        //一昨日
+  var mthreedays = Moment.moment().subtract(3, 'days');       //3日前
+  var mfourdays = Moment.moment().subtract(4,'days');         //4日前
+  var mfivedays = Moment.moment().subtract(5, 'days');        //5日前
+  var msixdays = Moment.moment().subtract(6, 'days');         //6日前
+  var msevendays = Moment.moment().subtract(7, 'days');       //7日前
+  
+  for( var i = 0; i <= LastRow; i++ ){
+   // if( Moment.moment(arys[i][5]).isSame(yesterday, 'day') || Moment.moment(arys[i][5]).isSame(daybefore, 'day') || 
+   //     Moment.moment(arys[i][5]).isSame(mthreedays, 'day') || Moment.moment(arys[i][5]).isSame(mfourdays, 'day') || 
+   //     Moment.moment(arys[i][5]).isSame(mfivedays, 'day') || Moment.moment(arys[i][5]).isSame(msixdays, 'day') || 
+   //     Moment.moment(arys[i][5]).isSame(msevendays, 'day') ){
+    if( Moment.moment(arys[i][5]).isBefore(today, 'day') ){
+          if( arys[i][6] != {}){
+            if( arys[i][4].length == 0 && arys[i][7].length == 0 || arys[i][4].length > 0 && arys[i][7].length > 0 ){
+                data[count] = new Array();     //一配列内にさらに配列作成(二次配列化)
+                data[count][0] = arys[i][0];   //No
+                data[count][1] = arys[i][1];   //company
+                data[count][2] = arys[i][6];   //name
+               console.log("count="+count);
+              console.log("urlnum="+urlnum);
+                data[count][3] = "https://docs.google.com/spreadsheets/d/1ST_v_O6TclAjMBSR3rP1Dw-zvkhc6Uq9ydr5xTn143o/edit#gid=215344236&range=A" + urlnum;
+              //url
+                count++;
+            }
+          }
+    }
+    urlnum++;
+  }
+  
+  var chatWorkId = [];      //ChatWorkID 取得用
+  var sheetId = SpreadsheetApp.openById('1xPruhnFqs6bsPQVy1RvEgk0c1OPFW1F_kVeG1MQ72io');//フォームマーケティング事前ヒアリングシート開く
+  var sheetName = sheetId.getSheetByName('フォームの回答 1');
+  var chatWorkIdCount = 0;
+  var row = sheetName.getLastRow();
+  var nameMessage = [];
+  var sheetData = [[],[]];
+  sheetData = sheetName.getRange(1,1,sheetName.getMaxRows(),sheetName.getMaxColumns()).getValues();  //シート全体取得
+  for(var i = 0; i < data.length; i++ ) {
+    for (var j = 0; j < row; j++){
+      if(data[i][2] == sheetData[j][1]) {
+        if(chatWorkId.indexOf(sheetData[j][13]) == -1 && sheetData[j][13].length != 0){ //重複データがない＋空白データでなければtrue
+          chatWorkId[chatWorkIdCount] = sheetData[j][13];
+          nameMessage[chatWorkIdCount] = sheetData[j][1];
+          chatWorkIdCount++;
+          console.log("if内data["+j+"][1]="+sheetData[j][1]);
+          break;
+        }
+      }
+    }
+  }
+  console.log("chatworkid"+chatWorkId);
+  console.log("chatworkid"+nameMessage);
+  
+  chatWorkIdCount = 0;
+  if(count == 0){
+    var message = "先週の 宝探しシート要確認事項 はありませんでした。\n";
+    console.log("data="+data[0]);
+  }else if(count != 0){
+    var message = "先週の 宝探しシート要確認事項 一覧です。\n";
+    console.log("sheetData.length"+sheetData.length);
+    for(var m = 0; m < data.length; m++){
+    console.log("chatWorkId["+chatWorkIdCount+"]="+chatWorkId[chatWorkIdCount] );
+    console.log("名前["+chatWorkIdCount+"]="+data[m][2] );
+      for(var n =0; n < sheetData.length; n++){
+        if(data[m][2] ==  sheetData[n][1] && message.indexOf(data[m][2]) == -1){
+          message += "[To:" + chatWorkId[chatWorkIdCount] + "] " + data[m][2] + " さん\n";
+          chatWorkIdCount++;
+          for(var p = 0; p < data.length; p++){
+            if(sheetData[n][1] == data[p][2] && message.indexOf(data[p][0]) == -1){
+              message += " No: " + data[p][0] + "  【 " + data[p][1] + " 】 " + "\n";
+              message += data[p][3] + "\n"
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  var client = ChatWorkClient.factory ({token: 'a68ba27c640b687d6183d1d517d4de1b'});
+  client.sendMessage({room_id: 167629607, body: message});
+}
