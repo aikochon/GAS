@@ -1,0 +1,31 @@
+function setSheetName() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();                           // 現在のスプレッドシートを取得
+  var ss = spreadsheet.getActiveSheet();                                             // 現在のシートを取得
+  var productOne = ss.getRange("L3").getValue();                                     // 商品１の商品名を取得
+  var productTwo = ss.getRange("M3").getValue();                                     // 商品２の商品名を取得
+  var productThree = ss.getRange("N3").getValue();                                   // 商品３の商品名を取得
+  var productFour = ss.getRange("O3").getValue();                                    // 商品４の商品名を取得
+  var productFive = ss.getRange("P3").getValue();                                    // 商品５の商品名を取得
+
+  var getProductOneSheet = spreadsheet.getSheets()[13];
+  var getProductTwoSheet = spreadsheet.getSheets()[14];
+  var getProductThreeSheet = spreadsheet.getSheets()[15];
+  var getProductFourSheet = spreadsheet.getSheets()[16];
+  var getProductFiveSheet = spreadsheet.getSheets()[17];
+
+  getProductOneSheet.setName("1_" +productOne);
+  getProductTwoSheet.setName("2_" +productTwo);
+  getProductThreeSheet.setName("3_" +productThree);
+  getProductFourSheet.setName("4_" +productFour);
+  getProductFiveSheet.setName("5_" +productFive);
+
+  //var sheet = spreadsheet.getSheets()[0];
+  // そのシートの ID を取得しログに出力
+  // Logger.log(log);
+  
+  Logger.log(productOne);
+  Logger.log(productTwo);
+  Logger.log(productThree);
+  Logger.log(productFour);
+  Logger.log(productFive);
+}
